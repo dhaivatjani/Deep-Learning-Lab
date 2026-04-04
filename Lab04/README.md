@@ -1,14 +1,15 @@
-# IT549: Deep Learning — Lab Assignment 4
+# IT549: Deep Learning — Lab  4
 ## Object Detection Evolution: From R-CNN to YOLO
 
 **Name:** Dhaivat Jani  
 **ID:** 202511053  
+**Course:** IT549 – Deep Learning
 
 ---
 
 ## Project Overview
 
-This lab traces the full evolution of object detection — from slow region-proposal pipelines (R-CNN, Fast R-CNN) to modern single-pass architectures (Faster R-CNN, YOLOv8). All tasks are implemented end-to-end on the **Fruit Images for Object Detection** dataset (Apple, Banana, Orange).
+This lab traces the full evolution of object detection, from slow region-proposal pipelines (R-CNN, Fast R-CNN) to modern single-pass architectures (Faster R-CNN, YOLOv8). All tasks are implemented end-to-end on the **Fruit Images for Object Detection** dataset (Apple, Banana, Orange).
 
 **Dataset:** [Fruit Images for Object Detection — Kaggle](https://www.kaggle.com/datasets/mbkinaci/fruit-images-for-object-detection)
 
@@ -19,6 +20,7 @@ This lab traces the full evolution of object detection — from slow region-prop
 ```
 Lab04/
 ├── Lab04.ipynb          # Main notebook with all tasks
+├── best.pt              # Finetuned YOLOv8 weights 
 └── README.md            # This file
 ```
 
@@ -26,7 +28,7 @@ Lab04/
 
 ## Tasks Completed
 
-### Preparation — Ground Truth Visualization
+### Preparation: Ground Truth Visualization
 - Loaded random training images and parsed Pascal VOC XML annotations
 - Drew ground-truth bounding boxes with class labels using Matplotlib and OpenCV
 
@@ -89,7 +91,7 @@ Total time : 0.0400 seconds  (40.0 ms)
 - Visualized final filtered detections
 
 #### Conceptual Analysis
-> Selective Search is a hand-crafted, external algorithm that cannot be learned or jointly optimized. The **Region Proposal Network (RPN)** replaces it by sliding a small network over the **same shared feature map** already computed by the backbone — adding near-zero overhead. At each spatial location, it predicts objectness scores and box offsets for a set of anchor boxes (multiple scales and aspect ratios). Being fully differentiable, the RPN is trained end-to-end with the detector, learning to propose exactly the regions the classifier needs.
+> Selective Search is a hand-crafted, external algorithm that cannot be learned or jointly optimized. The **Region Proposal Network (RPN)** replaces it by sliding a small network over the **same shared feature map** already computed by the backbone, adding near-zero overhead. At each spatial location, it predicts objectness scores and box offsets for a set of anchor boxes (multiple scales and aspect ratios). Being fully differentiable, the RPN is trained end-to-end with the detector, learning to propose exactly the regions the classifier needs.
 
 ---
 
@@ -103,7 +105,7 @@ Custom `non_maximum_suppression()` implemented using the IoU function from Task 
 4. Repeat until no boxes remain
 
 #### Conceptual Analysis
-> **High threshold (0.9):** NMS only suppresses boxes with near-total overlap. For tightly packed fruits, neighboring boxes overlap moderately but not at 90% — so most duplicates survive, producing many false positives (multiple boxes per apple).  
+> **High threshold (0.9):** NMS only suppresses boxes with near-total overlap. For tightly packed fruits, neighboring boxes overlap moderately but not at 90%, so most duplicates survive, producing many false positives (multiple boxes per apple).  
 > **Low threshold (0.1):** Even slight overlap triggers suppression. Boxes for genuinely distinct nearby fruits get discarded, causing missed detections (one box where there should be several).  
 > A moderate threshold (~0.4–0.5) balances these extremes for dense scenes.
 
@@ -137,39 +139,4 @@ Custom `non_maximum_suppression()` implemented using the IoU function from Task 
 **Key Observations:**
 - Faster R-CNN achieves high recall but suffers from low precision and the slowest inference (72.1 ms), making it impractical for real-time use
 - Pretrained YOLOv8n is fast but shows moderate accuracy since it was never trained on fruit-specific data
-- Fine-tuned YOLOv8n delivers the best result across all three metrics — highest precision, competitive recall, and the fastest inference at 13.4 ms per image
-
----
-
-## Environment
-
-| Package | Version |
-|---|---|
-| Python | 3.10 |
-| PyTorch | 2.x |
-| Torchvision | 0.x |
-| Ultralytics | 8.3.x |
-| OpenCV | 4.x |
-| CUDA | RTX 5060 Laptop GPU |
-
----
-
-## How to Run
-
-```bash
-# 1. Clone the repository
-git clone <your-repo-url>
-cd Lab04
-
-# 2. Install dependencies
-pip install torch torchvision ultralytics opencv-contrib-python matplotlib
-
-# 3. Download dataset
-kaggle datasets download -d mbkinaci/fruit-images-for-object-detection
-unzip fruit-images-for-object-detection.zip
-
-# 4. Open and run the notebook
-jupyter notebook Lab04.ipynb
-```
-
-> Update the `DATASET_ROOT` path in the first code cell to point to your local dataset directory before running.
+- Fine-tuned YOLOv8n delivers the best result across all three metrics: highest precision, competitive recall, and the fastest inference at 13.4 ms per image
